@@ -8,7 +8,9 @@ TOKEN = os.getenv("TOKEN")
 wpierdol = ["R1O-GN", "LXQ2-T", "4-HWWF", "T5ZI-S", "Y-MPWL", "PR-8CA", "J-ZYSZ", "D-PNP9", "G-M4GK", "UGR-J2",
             "MJ-5F9", "Q-5211"]
 jita = ["Jita"]
-
+amarr = ["Amarr"]
+hek = ["Hek"]
+rens = ["Rens"]
 
 def systemsEVE(sysname):
     connectionlist = []
@@ -23,9 +25,10 @@ def systemsEVE(sysname):
                 sig = x['signatureId']
                 reg = x['destinationSolarSystem']['region']['name']
                 eol = x['wormholeEol']
+                source = x['sourceWormholeType']['dest']
                 if 0 < jmp < 14:
                     connectionlisttemp.append(
-                        f' {destynacjax} \n sygnatura: {sig} \n ile: {jmp} \n wlotowy: {name} \n region: {reg} \n EoL: {eol}')
+                        f' {destynacjax} \n sygnatura: {sig} \n ile: {jmp} \n wlotowy: {name}({source}) \n region: {reg} \n EoL: {eol}')
             if not connectionlisttemp:
                 connectionlist.append((f'{destynacjax} za daleko albo nima'))
             if connectionlisttemp:
@@ -60,8 +63,20 @@ async def on_message(message):
         for x in systemsEVE(jita):
             await message.channel.send("```yaml\n" + x + "```")
 
+    if message.content.startswith('$amarr'):
+        for x in systemsEVE(amarr):
+            await message.channel.send("```yaml\n" + x + "```")
+
+    if message.content.startswith('$hek'):
+        for x in systemsEVE(hek):
+            await message.channel.send("```yaml\n" + x + "```")
+
+    if message.content.startswith('$rens'):
+        for x in systemsEVE(rens):
+            await message.channel.send("```yaml\n" + x + "```")
+
     if message.content.startswith('$help'):
-        await message.channel.send("```yaml\n" + "Komendy: \n $jita \n $systemy" + "```")
+        await message.channel.send("```yaml\n" + "Komendy: \n $jita \n $amarr \n $hek \n $rens \n $systemy" + "```")
 
 
 client.run(TOKEN)
