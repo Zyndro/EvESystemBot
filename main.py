@@ -37,9 +37,7 @@ def systemsEVE(sysname):
     except Exception as e:
         return e
 
-
 client = discord.Client()
-
 
 @client.event
 async def on_ready():
@@ -51,11 +49,16 @@ async def on_message(message):
         return
 
     if message.content.startswith('$systemy'):
+        await message.channel.send("Szukam...")
         for x in systemsEVE(wpierdol):
             await message.channel.send("```yaml\n"+x+"```")
 
     if message.content.startswith('$jita'):
         for x in systemsEVE(jita):
             await message.channel.send("```yaml\n"+x+"```")
+
+    if message.content.startswith('$help'):
+            await message.channel.send("```yaml\n"+"Dostępne komendy: \n $jita \n $systemy"+"```")
+
 
 client.run(TOKEN)
