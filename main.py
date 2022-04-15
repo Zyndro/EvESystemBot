@@ -1,7 +1,9 @@
 import requests
 import discord
 import os
+from PIL import Image,ImageFont, ImageDraw
 from dotenv import load_dotenv
+import re
 
 load_dotenv()
 TOKEN = os.getenv("TOKEN")
@@ -15,10 +17,10 @@ rens = ["Rens"]
 def systemsEVE(sysname):
     connectionlist = []
     try:
+        lastjump = 0
         for destynacjax in sysname:
             url = 'https://www.eve-scout.com/api/wormholes?systemSearch=' + destynacjax + '&method=shortest&limit=1000&offset=0&sort=jumps&order=asc'
             r = requests.get(url, headers={'accept': 'application/json'})
-            connectionlisttemp = []
             for x in r.json():
                 jmp = x['jumps']
                 name = x['destinationSolarSystem']['name']
@@ -27,21 +29,17 @@ def systemsEVE(sysname):
                 eol = x['wormholeEol']
                 source = x['sourceWormholeType']['dest']
                 if 0 < jmp < 14:
-                    connectionlisttemp.append(
-                        f' {destynacjax} \n sygnatura: {sig} \n ile: {jmp} \n wlotowy: {name}({source}) \n region: {reg} \n EoL: {eol}')
-            if not connectionlisttemp:
-                connectionlist.append((f'{destynacjax} za daleko albo nima'))
-            if connectionlisttemp:
-                for x in connectionlisttemp:
-                    connectionlist.append(x)
+                        connectionlist.append(
+                            f' {destynacjax} | sygnatura: {sig} | ile: {jmp} | wlotowy: {name}({source}) | region: {reg} | EoL: {eol}')
 
         return connectionlist
     except Exception as e:
         return e
 
+def sorte(elem):
+    return re.findall(r'ile: (\d+)',elem)
 
 client = discord.Client()
-
 
 @client.event
 async def on_ready():
@@ -53,11 +51,28 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    if message.content.startswith('$systemy'):
+    if message.content.startswith('$test'):
         await message.channel.send("Szukam...")
-        for x in systemsEVE(wpierdol):
-            await message.channel.send("```yaml\n" + x + "```")
+        listasystemow = systemsEVE(wpierdol)
+        listasystemow = sorted(listasystemow, key=sorte)
+        myFont = ImageFont.truetype('arial.ttf', 30)
+        h = (len(max(listasystemow, key=len))*14)
+        w = (len(listasystemow)*45)+45
+        img = Image.new("RGB", (h, w), (0, 0, 0))
+        I1 = ImageDraw.Draw(img)
+        line=0
+        for x in listasystemow:
+            I1.text((10, (line+40)), x, font=myFont, fill=(255, 255, 255))
+            shape = [(10, 40+line), (h-10, 40+line)]
+            I1.line(shape, fill=128, width=7)
+            #await message.channel.send("```yaml\n" + x + "```")
+            line = line+40
+        shape = [(10, 40 + line), (h-10, 40 + line)]
+        I1.line(shape, fill=128, width=8)
+        img.save("systemy.png")
+        await message.channel.send(file=discord.File("systemy.png"))
         await message.channel.send("Znalazłem!")
+        os.remove("systemy.png")
 
     if message.content.startswith('$jita'):
         for x in systemsEVE(jita):
