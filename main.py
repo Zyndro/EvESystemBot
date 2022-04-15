@@ -51,7 +51,7 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    if message.content.startswith('$test'):
+    if message.content.startswith('$systemy'):
         await message.channel.send("Szukam...")
         listasystemow = systemsEVE(wpierdol)
         listasystemow = sorted(listasystemow, key=sorte)
