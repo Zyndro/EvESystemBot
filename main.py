@@ -37,7 +37,7 @@ def systemsEVE(sysname):
         return e
 
 def sorte(elem):
-    return re.findall(r'ile: (\d+)',elem)
+    return int(re.findall('ile: (\d+)', elem)[0])
 
 client = discord.Client()
 
