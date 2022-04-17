@@ -32,13 +32,13 @@ def systemsEVE(sysname):
                 if 0 < jmp < 14:
                         connectionlist.append(
                             f' {destynacjax} | sygnatura: {sig} | ile: {jmp} | wlotowy: {name}({source}) | region: {reg} | EoL: {eol}')
-        connectionlist = sorted(connectionlist, key=sorte)
+        connectionlist = sorted(connectionlist, key=ile_sort)
         return connectionlist
     except Exception as e:
         connectionlist.append(str(e))
         return connectionlist
 
-def sorte(elem):
+def ile_sort(elem):
     return int(re.findall('ile: (\d+)', elem)[0])
 
 def draw_list(h,w,list):
