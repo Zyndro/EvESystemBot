@@ -7,6 +7,7 @@ import re
 
 load_dotenv()
 TOKEN = os.getenv("TOKEN")
+myFont = ImageFont.truetype('arial.ttf', 30)
 wpierdol = ["R1O-GN", "LXQ2-T", "4-HWWF", "T5ZI-S", "Y-MPWL", "PR-8CA", "J-ZYSZ", "D-PNP9", "G-M4GK", "UGR-J2",
             "MJ-5F9", "Q-5211"]
 jita = ["Jita"]
@@ -31,13 +32,29 @@ def systemsEVE(sysname):
                 if 0 < jmp < 14:
                         connectionlist.append(
                             f' {destynacjax} | sygnatura: {sig} | ile: {jmp} | wlotowy: {name}({source}) | region: {reg} | EoL: {eol}')
-
+        connectionlist = sorted(connectionlist, key=sorte)
         return connectionlist
     except Exception as e:
-        return e
+        connectionlist.append(str(e))
+        return connectionlist
 
 def sorte(elem):
     return int(re.findall('ile: (\d+)', elem)[0])
+
+def draw_list(h,w,list):
+    img = Image.new("RGB", (h, w), (0, 0, 0))
+    I1 = ImageDraw.Draw(img)
+    line = 0
+    for x in list:
+        I1.text((10, (line + 40)), x, font=myFont, fill=(255, 255, 255))
+        shape = [(10, 40 + line), (h - 10, 40 + line)]
+        I1.line(shape, fill=128, width=7)
+        line = line + 40
+    shape = [(10, 40 + line), (h - 10, 40 + line)]
+    I1.line(shape, fill=128, width=8)
+    img.save("systemy.png")
+    return "systemy.png"
+
 
 client = discord.Client()
 
@@ -54,25 +71,10 @@ async def on_message(message):
     if message.content.startswith('$systemy'):
         await message.channel.send("Szukam...")
         listasystemow = systemsEVE(wpierdol)
-        listasystemow = sorted(listasystemow, key=sorte)
-        myFont = ImageFont.truetype('arial.ttf', 30)
-        h = (len(max(listasystemow, key=len))*14)
-        w = (len(listasystemow)*45)+45
-        img = Image.new("RGB", (h, w), (0, 0, 0))
-        I1 = ImageDraw.Draw(img)
-        line=0
-        for x in listasystemow:
-            I1.text((10, (line+40)), x, font=myFont, fill=(255, 255, 255))
-            shape = [(10, 40+line), (h-10, 40+line)]
-            I1.line(shape, fill=128, width=7)
-            #await message.channel.send("```yaml\n" + x + "```")
-            line = line+40
-        shape = [(10, 40 + line), (h-10, 40 + line)]
-        I1.line(shape, fill=128, width=8)
-        img.save("systemy.png")
-        await message.channel.send(file=discord.File("systemy.png"))
+        img = draw_list((len(max(listasystemow, key=len))*14),((len(listasystemow)*45)+45),listasystemow)
+        await message.channel.send(file=discord.File(img))
         await message.channel.send("Znalazłem!")
-        os.remove("systemy.png")
+        os.remove(img)
 
     if message.content.startswith('$jita'):
         for x in systemsEVE(jita):
